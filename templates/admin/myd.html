@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>满意度相关信息维护</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .header h2 {
+            color: #2c3e50;
+            font-size: 24px;
+        }
+
+        .back-link {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .back-link:hover {
+            background-color: #f1f8ff;
+            text-decoration: none;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            background: #fafafa;
+            border-radius: 6px;
+            padding: 20px;
+        }
+
+        .section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            font-size: 18px;
+        }
+
+        .department-form {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .department-form input,
+        .department-form select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .department-form input:focus,
+        .department-form select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .department-form input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .department-form select {
+            width: 120px;
+        }
+
+        .department-form button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .department-form button:hover {
+            background-color: #2980b9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f8ff;
+        }
+
+        .work-desc-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .work-desc-form textarea {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            resize: vertical;
+            min-height: 60px;
+            font-size: 13px;
+        }
+
+        .work-desc-form textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .work-desc-form button {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            align-self: flex-start;
+        }
+
+        .work-desc-form button:hover {
+            background-color: #27ae60;
+        }
+
+        .delete-link {
+            color: #e74c3c;
+            text-decoration: none;
+            padding: 6px 10px;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+
+        .delete-link:hover {
+            background-color: #fdeded;
+            text-decoration: none;
+        }
+
+        .perm-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .perm-controls button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .perm-controls button:nth-child(1) {
+            background-color: #9b59b6;
+            color: white;
+        }
+
+        .perm-controls button:nth-child(1):hover {
+            background-color: #8e44ad;
+        }
+
+        .perm-controls button:nth-child(2) {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .perm-controls button:nth-child(2):hover {
+            background-color: #d35400;
+        }
+
+        .perm-controls button:nth-child(3) {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .perm-controls button:nth-child(3):hover:not(:disabled) {
+            background-color: #27ae60;
+        }
+
+        .perm-controls button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .readonly input[type="checkbox"],
+        .readonly input.weightInput {
+            opacity: 0.7;
+        }
+
+        .weightInput {
+            width: 80px;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            text-align: center;
+        }
+
+        .weightInput:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .delete-role-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-role-btn:hover {
+            background-color: #c0392b;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .department-form {
+                flex-direction: column;
+            }
+
+            .department-form input,
+            .department-form select {
+                width: 100%;
+                min-width: auto;
+            }
+
+            .perm-controls {
+                flex-direction: column;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h2>满意度相关信息维护</h2>
+        <a href="/admin/index" class="back-link">← 返回后台首页</a>
+    </div>
+
+    <div class="section">
+        <h3>一、部门信息管理</h3>
+
+        <form method="post" class="department-form">
+            <input type="text" name="dept_name" placeholder="请输入部门名称" required>
+            <select name="dept_type">
+                <option value="front">前台部门</option>
+                <option value="middle">中后台部门</option>
+            </select>
+            <button type="submit">新增部门</button>
+        </form>
+
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>部门名称</th>
+                <th>部门类型</th>
+                <th>工作完成情况说明</th>
+                <th>操作</th>
+            </tr>
+
+            {% for dept in departments %}
+            <tr>
+                <td>{{ dept.id }}</td>
+                <td>{{ dept.dept_name }}</td>
+                <td>{{ '前台' if dept.dept_type=='front' else '中后台' }}</td>
+
+                <td>
+                    <form method="post" action="/admin/departments/update_desc" class="work-desc-form">
+                        <input type="hidden" name="dept_id" value="{{ dept.id }}">
+                        <textarea name="work_desc"
+                                  rows="3"
+                                  placeholder="300-1000字">{{ dept.work_desc or '' }}</textarea>
+                        <button type="submit">保存</button>
+                    </form>
+                </td>
+
+                <td>
+                    <a href="/admin/departments/delete/{{ dept.id }}"
+                       class="delete-link"
+                       onclick="return confirm('确定要删除该部门吗？')">
+                        删除
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>二、部门满意度评价权限配置</h3>
+
+        <div class="perm-controls">
+            <button onclick="addRole()">增加角色</button>
+            <button onclick="enableEdit()">修改</button>
+            <button id="saveBtn" disabled onclick="save()">保存</button>
+        </div>
+
+        <table id="permTable" class="readonly">
+            <thead>
+            <tr>
+                <th rowspan="2">角色</th>
+                {% for t in ['front','middle'] %}
+                <th colspan="{{ departments | selectattr('dept_type','equalto',t) | list | length }}">
+                    {{ '前台部门' if t=='front' else '中后台部门' }}
+                </th>
+                {% endfor %}
+                <th rowspan="2">操作</th>
+            </tr>
+            <tr>
+                {% for d in departments %}
+                <th>{{ d.dept_name }}</th>
+                {% endfor %}
+            </tr>
+            </thead>
+
+            <tbody>
+            {% for r in roles %}
+            <tr data-role-id="{{ r.id }}">
+                <td>{{ r.role_name }}</td>
+
+                {% for d in departments %}
+                <td>
+                    <div style="display:flex;flex-direction:column;gap:4px;align-items:center;">
+                        <input type="checkbox"
+                               class="permCheck"
+                               data-dept-id="{{ d.id }}"
+                               disabled
+                               {% if myd_permissions.get(r.id) and d.id in myd_permissions.get(r.id) %}checked{% endif
+                               %}
+                               onchange="markDirty()">
+
+                        <input type="number"
+                               class="weightInput"
+                               data-dept-id="{{ d.id }}"
+                               value="{{ myd_permissions.get(r.id, {}).get(d.id, 1.00) }}"
+                               min="0"
+                               step="0.01"
+                               disabled
+                               onchange="markDirty()">
+                    </div>
+                </td>
+                {% endfor %}
+
+                <td>
+                    <button class="delete-role-btn" onclick="deleteRole({{ r.id }}, '{{ r.role_name }}')">删除</button>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let editing = false;
+    let dirty = false;
+
+    function enableEdit(){
+        editing = true;
+        document.getElementById('permTable').classList.remove('readonly');
+        document.querySelectorAll('.permCheck, .weightInput').forEach(c => c.disabled = false);
+    }
+
+    function markDirty(){
+        dirty = true;
+        document.getElementById('saveBtn').disabled = false;
+    }
+
+    function save(){
+        const payload = [];
+
+        document.querySelectorAll('#permTable tbody tr').forEach(row => {
+            const roleId = parseInt(row.dataset.roleId);
+
+            row.querySelectorAll('.permCheck').forEach(cb => {
+                const weightInput = row.querySelector(`.weightInput[data-dept-id='${cb.dataset.deptId}']`);
+                if(cb.checked && weightInput){
+                    payload.push({
+                        role_id: roleId,
+                        dept_id: parseInt(cb.dataset.deptId),
+                        weight: parseFloat(weightInput.value || 1)
+                    });
+                }
+            });
+        });
+
+        fetch('/admin/myd/permission/save', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        })
+        .then(r => r.json())
+        .then(res => {
+            if(res.error){
+                alert(res.error);
+                return;
+            }
+            alert('保存成功');
+            location.reload();
+        })
+        .catch(() => alert('保存失败，请重试'));
+    }
+
+    function addRole(){
+        const name = prompt('请输入角色名称（中文）');
+        if(!name) return;
+
+        fetch('/admin/role/add',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({role_name:name})
+        }).then(r=>{
+            if(!r.ok){
+                return r.json().then(d=>alert(d.error));
+            }
+            location.reload();
+        });
+    }
+
+    function deleteRole(roleId, roleName){
+        if(!confirm(`确定要删除角色「${roleName}」吗？\n\n该角色的部门权限将一并清除！`)){
+            return;
+        }
+
+        fetch('/admin/role/delete', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ role_id: roleId })
+        })
+        .then(r => r.json())
+        .then(res => {
+            if(res.error){
+                alert(res.error);
+                return;
+            }
+            alert('删除成功');
+            location.reload();
+        });
+    }
+
+    // 保存成功提示
+    (function () {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('saved') === '1') {
+            alert('工作完成情况说明已保存成功');
+            // 清掉参数，防止刷新再次弹
+            window.history.replaceState({}, '', window.location.pathname);
+        }
+    })();
+</script>
+</body>
+</html>

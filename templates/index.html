@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>部门评分系统</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/all.min.css') }}" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
+            min-height: 100vh;
+            padding-top: 20px;
+            padding-bottom: 50px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .scoring-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 25px;
+            width: 100%;
+        }
+
+        .col-lg-8 {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.6);
+        }
+
+        .user-info {
+            background: #e8f4ff;
+            border-radius: 10px;
+            padding: 10px 15px;
+            font-size: 0.9rem;
+        }
+
+        .zdgz-rule-sticky {
+            position: sticky;
+            top: 15px;
+            z-index: 1020;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <div class="header text-center">
+        <h1 class="display-5 fw-bold">部门评分系统</h1>
+        <div class="user-info d-inline-block px-3 py-2 mb-3">
+            登录码: <span class="fw-bold">{{ session.login_code }}</span>
+            <a href="/logout" class="ms-3 text-danger">退出</a>
+        </div>
+    </div>
+
+    <form method="POST" action="/score/save">
+
+        <!-- 重点工作指标评价 -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8 mb-4">
+                <div class="scoring-card">
+                    <h4 class="mb-4">重点工作指标评价打分</h4>
+                    <div class="alert alert-warning mb-4 zdgz-rule-sticky">
+                        <strong>评分规则提示：</strong>
+                        <span class="text-danger fw-bold">“优秀”</span>
+                        最多只能选择
+                        <span class="text-danger fw-bold" id="maxExcellent">0</span>
+                        项。
+                        <br>
+                        <span class="text-danger fw-bold">并至少选取 2 个部门</span>，
+                        每个部门需勾选
+                        <span class="text-danger fw-bold">4 项或 5 项</span>
+                        优秀指标。
+                        <br>
+                        当前已选择优秀：
+                        <span class="fw-bold text-primary" id="currentExcellent">0</span>
+                        项
+                    </div>
+
+                    {% for dept_name, items in zdgz_by_dept.items() %}
+                    <div class="mb-4 p-3 border rounded bg-light">
+                        <h5 class="mb-3 text-primary">{{ dept_name }}</h5>
+
+                        {% for item in items %}
+                        <div class="mb-3 ps-3 border-start">
+                            <div class="fw-bold">
+                                {{ item.indicator_name }}
+                            </div>
+                            {% if item.description %}
+                            <div class="mt-1 mb-2">
+                                <a class="text-decoration-none small"
+                                   data-bs-toggle="collapse"
+                                   href="#desc{{ item.id }}"
+                                   role="button"
+                                   aria-expanded="false"
+                                   aria-controls="desc{{ item.id }}">
+                                    <strong>指标含义：</strong>
+                                    <span class="text-primary">点击展开查看详情</span>
+                                </a>
+
+                                <div class="collapse mt-2" id="desc{{ item.id }}">
+                                    <div class="card card-body small text-muted">
+                                        {{ item.description | trim }}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if item.work_desc %}
+                            <div class="mt-1 mb-2">
+                                <a class="text-decoration-none small"
+                                   data-bs-toggle="collapse"
+                                   href="#work{{ item.id }}"
+                                   role="button"
+                                   aria-expanded="false"
+                                   aria-controls="work{{ item.id }}">
+                                    <strong>完成情况：</strong>
+                                    <span class="text-primary">点击展开查看详情</span>
+                                </a>
+
+                                <div class="collapse mt-2" id="work{{ item.id }}">
+                                    <div class="card card-body small text-muted">
+                                        {{ item.work_desc | trim }}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <div class="mb-2 small">
+                                <strong>佐证材料：</strong>
+                                {% if item.evidence_path %}
+                                <a href="{{ url_for('download_zdgz_evidence', zdgz_id=item.id) }}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    查看佐证材料
+                                </a>
+                                {% else %}
+                                <span class="text-muted">未上传</span>
+                                {% endif %}
+                            </div>
+
+                            <select class="form-select w-50 zdgz-select"
+                                    name="zdgz_{{ item.id }}"
+                                    required>
+                                <option value="130" data-excellent="1">优秀（130%）</option>
+                                <option value="110">良好（110%）</option>
+                                <option value="90">一般（90%）</option>
+                                <option value="70">较差（70%）</option>
+                            </select>
+
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 满意度打分 -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8 mb-4">
+                <div class="scoring-card">
+                    <h4 class="mb-4">满意度打分</h4>
+                    <div class="alert alert-info small mb-4">
+                        满意度打分主要用于考核各部门在
+                        <span class="fw-bold">战略执行和效率提升</span>、
+                        <span class="fw-bold">业务联动及协同配合</span>、
+                        <span class="fw-bold">风险管控与合规经营</span>、
+                        <span class="fw-bold">为基层提供服务支持</span>
+                        等方面工作的落实效果。
+                    </div>
+<!--                    <div class="alert alert-warning mb-4">-->
+<!--                        <strong>评分规则提示：</strong>-->
+<!--                        <span class="text-danger fw-bold">“优秀”</span>-->
+<!--                        最多只能选择-->
+<!--                        <span class="text-danger fw-bold" id="maxExcellentSatisfaction">0</span>-->
+<!--                        个部门。-->
+<!--                        <br>-->
+<!--                        当前已选择优秀：-->
+<!--                        <span class="fw-bold text-primary" id="currentExcellentSatisfaction">0</span>-->
+<!--                        个-->
+<!--                    </div>-->
+                    {% for dept in departments %}
+                    <div class="mb-3 p-3 border rounded bg-light">
+                        <label class="fw-bold text-primary">
+                            {{ dept.dept_name }}
+                        </label>
+                        {% if dept.work_desc %}
+                        <div class="mt-1 mb-2">
+                            <a class="text-decoration-none small"
+                               data-bs-toggle="collapse"
+                               href="#workDesc{{ dept.id }}"
+                               role="button"
+                               aria-expanded="false"
+                               aria-controls="workDesc{{ dept.id }}">
+                                <strong>工作完成情况:</strong>
+                                <span class="text-primary">点击展开查看详情</span>
+                            </a>
+
+                            <div class="collapse mt-2" id="workDesc{{ dept.id }}">
+                                <div class="card card-body small text-muted">
+                                    {{ dept.work_desc }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <select class="form-select satisfaction-select"
+                                name="satisfaction_{{ dept.id }}"
+                                required>
+                            <option value="130">优秀（130%）</option>
+                            <option value="120">优秀（120%）</option>
+                            <option value="110">良好（110%）</option>
+                            <option value="100">良好（100%）</option>
+                            <option value="90">一般（90%）</option>
+                            <option value="80">一般（80%）</option>
+                            <option value="70">较差（70%）</option>
+                            <option value="60">较差（60%）</option>
+                        </select>
+                    </div>
+                    {% endfor %}
+                    <div class="d-grid mt-4">
+                        <button class="btn btn-submit" type="submit">
+                            提交评分
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </form>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        function getTotalZdgzDeptCount() {
+            return document.querySelectorAll('.mb-4.p-3.border.rounded > h5').length;
+        }
+
+        /* ========= 重点工作指标 ========= */
+        const zdgzSelects = document.querySelectorAll('.zdgz-select');
+        const zdgzTotal = zdgzSelects.length;
+        const zdgzMaxExcellent = Math.floor(zdgzTotal * 0.6);
+
+        document.getElementById('maxExcellent').textContent = zdgzMaxExcellent;
+
+        function getZdgzExcellentCount() {
+            let count = 0;
+            zdgzSelects.forEach(sel => {
+                if (parseFloat(sel.value) === 130) count++;
+            });
+            return count;
+        }
+
+        function getExcellentCountByDept() {
+            const deptMap = new Map();
+
+            document.querySelectorAll('.zdgz-select').forEach(sel => {
+                if (parseFloat(sel.value) === 130) {
+                    // 找到所属部门容器
+                    const deptBox = sel.closest('.mb-4.p-3.border.rounded');
+                    if (!deptBox) return;
+
+                    const deptName = deptBox.querySelector('h5')?.innerText || '未知部门';
+
+                    deptMap.set(deptName, (deptMap.get(deptName) || 0) + 1);
+                }
+            });
+
+            return deptMap;
+        }
+
+        function updateZdgzExcellentLimit() {
+            const count = getZdgzExcellentCount();
+            document.getElementById('currentExcellent').textContent = count;
+
+            const reachLimit = count >= zdgzMaxExcellent;
+            zdgzSelects.forEach(sel => {
+                sel.querySelectorAll('option').forEach(opt => {
+                    if (parseFloat(opt.value) === 130) {
+                        opt.disabled = reachLimit && parseFloat(sel.value) !== 130;
+                    }
+                });
+            });
+        }
+
+        zdgzSelects.forEach(sel => {
+            sel.addEventListener('change', updateZdgzExcellentLimit);
+        });
+
+        updateZdgzExcellentLimit();
+
+
+        /* ========= 满意度 ========= */
+        const satSelects = document.querySelectorAll('.satisfaction-select');
+        const satTotal = satSelects.length;
+<!--        const satMaxExcellent = Math.floor(satTotal * 0.6);-->
+
+<!--        document.getElementById('maxExcellentSatisfaction').textContent = satMaxExcellent;-->
+
+        function getSatisfactionExcellentCount() {
+            let count = 0;
+            satSelects.forEach(sel => {
+                if (parseFloat(sel.value) >= 120) count++;
+            });
+            return count;
+        }
+
+<!--        function updateSatisfactionExcellentLimit() {-->
+<!--            const count = getSatisfactionExcellentCount();-->
+<!--            document.getElementById('currentExcellentSatisfaction').textContent = count;-->
+
+<!--            const reachLimit = count >= satMaxExcellent;-->
+<!--            satSelects.forEach(sel => {-->
+<!--                sel.querySelectorAll('option').forEach(opt => {-->
+<!--                    const score = parseFloat(opt.value);-->
+<!--                    if (score >= 120) {-->
+<!--                        opt.disabled = reachLimit && parseFloat(sel.value) < 120;-->
+<!--                    }-->
+<!--                });-->
+<!--            });-->
+<!--        }-->
+
+<!--        satSelects.forEach(sel => {-->
+<!--            sel.addEventListener('change', updateSatisfactionExcellentLimit);-->
+<!--        });-->
+
+<!--        updateSatisfactionExcellentLimit();-->
+
+        const form = document.querySelector('form');
+
+        form.addEventListener('submit', function (e) {
+
+            const zdgzExcellent = getZdgzExcellentCount();
+            const satExcellent = getSatisfactionExcellentCount();
+            const deptExcellentMap = getExcellentCountByDept();
+
+            const totalDeptCount = getTotalZdgzDeptCount();
+
+            if (totalDeptCount >= 3) {
+                let qualifiedDeptCount = 0;
+                deptExcellentMap.forEach(count => {
+                    if (count >= 4) qualifiedDeptCount++;
+                });
+
+                if (qualifiedDeptCount < 2) {
+                    e.preventDefault();
+                    alert('重点工作指标评分要求：当可评分部门不少于 3 个时，至少需有 2 个部门，每个部门评出不少于 4 项“优秀”。');
+                    return;
+                }
+            }
+
+            if (zdgzExcellent > zdgzMaxExcellent) {
+                e.preventDefault();
+                alert(`重点工作指标“优秀”数量超出限制（最多 ${zdgzMaxExcellent} 项），请调整后再提交。`);
+                return;
+            }
+
+<!--            if (satExcellent > satMaxExcellent) {-->
+<!--                e.preventDefault();-->
+<!--                alert(`满意度评分“优秀”数量超出限制（最多 ${satMaxExcellent} 个部门），请调整后再提交。`);-->
+<!--                return;-->
+<!--            }-->
+        });
+    });
+</script>
+
+</body>
+</html>

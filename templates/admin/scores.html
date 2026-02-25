@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>评分结果管理</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+    <style>
+        /* 全局重置与基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        /* 卡片容器 */
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            margin: 2rem 0;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .card-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        /* 统计信息 */
+        .stats-info {
+            margin-bottom: 1rem;
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        /* 按钮优化 */
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+            padding: 0.45rem 1rem;
+            font-size: 0.95rem;
+            border-radius: 6px;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-outline-secondary {
+            border-radius: 6px;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        /* 标题 */
+        h4 {
+            margin: 1.75rem 0 1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.2rem;
+        }
+
+        /* 表格样式增强 */
+        .score-table {
+            margin-bottom: 1.5rem;
+        }
+
+        .score-table th {
+            font-weight: 600;
+            color: #495057;
+            white-space: nowrap;
+        }
+
+        .score-table td,
+        .score-table th {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .weighted-score {
+            font-weight: 600;
+            color: #0d6efd;
+        }
+
+        .total-score {
+            font-weight: 700;
+            color: #dc3545;
+            background-color: #fff5f5;
+        }
+
+        /* 标签页样式微调 */
+        .nav-tabs .nav-link {
+            border: 1px solid transparent;
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+            color: #495057;
+            border-radius: 6px 6px 0 0;
+            transition: all 0.2s;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: #0d6efd;
+            background-color: #fff;
+            border-color: #dee2e6 #dee2e6 #fff;
+            font-weight: 600;
+        }
+
+        .nav-tabs .nav-link:hover {
+            background-color: #f8f9fa;
+            border-color: #e9ecef;
+        }
+
+        .tab-content {
+            padding: 1rem 0;
+        }
+
+        .table-responsive {
+            margin-top: 0.5rem;
+        }
+
+        /* 响应式优化 */
+        @media (max-width: 768px) {
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+
+            .card-header h2 {
+                font-size: 1.35rem;
+            }
+
+            h4 {
+                font-size: 1.1rem;
+                margin-top: 1.5rem;
+            }
+
+            .btn-success,
+            .btn-outline-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .nav-tabs .nav-link {
+                font-size: 0.9rem;
+                padding: 0.4rem 0.8rem;
+            }
+
+            .score-table th,
+            .score-table td {
+                font-size: 0.9rem;
+                padding: 0.4rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding: 10px;
+            }
+
+            .card {
+                margin: 1.5rem 0;
+            }
+
+            .stats-info {
+                font-size: 0.9rem;
+            }
+
+            .score-table th,
+            .score-table td {
+                font-size: 0.85rem;
+                padding: 0.3rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h2>评分结果管理</h2>
+            <a href="/admin/index" class="btn btn-outline-secondary btn-sm">← 返回后台首页</a>
+        </div>
+
+        <div class="card-body">
+            <div class="stats-info mb-3">
+                <strong>账号统计：</strong>
+                总账号 {{ total_count }} 个，
+                已使用 {{ used_count }} 个
+            </div>
+
+            <div class="mb-4">
+                {% for r in role_stats %}
+                <div class="mb-2 p-2 border rounded bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ r.role_name }}</strong>：
+                            共 {{ r.total }} 个，
+                            已使用 {{ r.used }} 个，
+                            未使用 {{ r.unused }} 个
+                        </div>
+                        {% if r.unused > 0 %}
+                        <a class="small text-decoration-none"
+                           data-bs-toggle="collapse"
+                           href="#unused{{ loop.index }}">
+                            查看未使用账号
+                        </a>
+                        {% endif %}
+                    </div>
+
+                    {% if r.unused > 0 %}
+                    <div class="collapse mt-2" id="unused{{ loop.index }}">
+                        <div class="card card-body small text-muted">
+                            {{ r.unused_codes | join('，') }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <a href="{{ url_for('export_scores') }}" class="btn btn-success mb-3">
+                导出评分结果
+            </a>
+
+            <!-- ================== 重点工作指标评分 ================== -->
+            <h4>重点工作指标评分</h4>
+
+            {% set depts = zdgz_scores | map(attribute='dept_name') | unique | list %}
+
+            <ul class="nav nav-tabs mb-3">
+                {% for dept in depts %}
+                <li class="nav-item">
+                    <button class="nav-link {% if loop.first %}active{% endif %}"
+                            data-bs-toggle="tab"
+                            data-bs-target="#zdgz-{{ loop.index }}">
+                        {{ dept }}
+                    </button>
+                </li>
+                {% endfor %}
+            </ul>
+
+            <div class="tab-content">
+                {% for dept in depts %}
+                <div class="tab-pane fade {% if loop.first %}show active{% endif %}"
+                     id="zdgz-{{ loop.index }}">
+                    {% set dept_scores = zdgz_scores | selectattr('dept_name','equalto',dept) | list %}
+                    {% set roles = dept_scores | map(attribute='role_name') | unique | list %}
+                    {% set indicators = dept_scores | map(attribute='indicator_name') | unique | list %}
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm score-table">
+                            <thead class="table-light">
+                            <tr>
+                                <th style="width:30%">指标</th>
+                                {% for role in roles %}
+                                <th>{{ role }}</th>
+                                {% endfor %}
+                                <th>合计总分</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for indicator in indicators %}
+                            <tr>
+                                <td>{{ indicator }}</td>
+                                {% for role in roles %}
+                                {% set r =
+                                dept_scores
+                                | selectattr('indicator_name','equalto',indicator)
+                                | selectattr('role_name','equalto',role)
+                                | list
+                                | first
+                                %}
+                                <td class="weighted-score score-cell"
+                                    data-score="{{ r.weighted_score if r else 0 }}">
+                                    {{ r.weighted_score if r else '—' }}
+                                </td>
+                                {% endfor %}
+                                <td class="total-score row-total">0</td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- ================== 满意度评分 ================== -->
+            <h4>满意度评分</h4>
+
+            {% set myd_depts = myd_scores | map(attribute='dept_name') | unique | list %}
+
+            <ul class="nav nav-tabs mb-3">
+                {% for dept in myd_depts %}
+                <li class="nav-item">
+                    <button class="nav-link {% if loop.first %}active{% endif %}"
+                            data-bs-toggle="tab"
+                            data-bs-target="#myd-{{ loop.index }}">
+                        {{ dept }}
+                    </button>
+                </li>
+                {% endfor %}
+            </ul>
+
+            <div class="tab-content">
+                {% for dept in myd_depts %}
+                <div class="tab-pane fade {% if loop.first %}show active{% endif %}"
+                     id="myd-{{ loop.index }}">
+                    {% set dept_scores = myd_scores | selectattr('dept_name','equalto',dept) | list %}
+
+                    <table class="table table-bordered table-sm score-table">
+                        <thead class="table-light">
+                        <tr>
+                            <th>打分角色</th>
+                            <th>基础平均分</th>
+                            <th>权重</th>
+                            <th>加权得分</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for s in dept_scores %}
+                        <tr>
+                            <td>{{ s.role_name }}</td>
+                            <td>{{ s.avg_score }}</td>
+                            <td>{{ s.myd_weight }}</td>
+                            <td class="weighted-score score-cell"
+                                data-score="{{ s.weighted_score }}">
+                                {{ s.weighted_score }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="table-warning">
+                            <td colspan="3"><strong>合计总分</strong></td>
+                            <td class="total-score table-total">0</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // 行合计（重点工作指标）
+        document.querySelectorAll('.score-table tbody tr').forEach(row => {
+            let total = 0;
+            row.querySelectorAll('.score-cell').forEach(cell => {
+                const score = parseFloat(cell.dataset.score);
+                if (!isNaN(score)) total += score;
+            });
+            const totalCell = row.querySelector('.row-total');
+            if (totalCell) {
+                totalCell.textContent = total.toFixed(2);
+            }
+        });
+
+        // 表合计（满意度）
+        document.querySelectorAll('.score-table').forEach(table => {
+            let total = 0;
+            table.querySelectorAll('.score-cell').forEach(cell => {
+                const score = parseFloat(cell.dataset.score);
+                if (!isNaN(score)) total += score;
+            });
+            const totalCell = table.querySelector('.table-total');
+            if (totalCell) {
+                totalCell.textContent = total.toFixed(2);
+            }
+        });
+
+    });
+</script>
+</body>
+</html>

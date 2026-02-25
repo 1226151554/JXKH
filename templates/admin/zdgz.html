@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>重点工作指标信息管理</title>
+    <link href="/static/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* 样式重置和基础设置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+
+        .back-link {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .back-link:hover {
+            background-color: #f1f8ff;
+            text-decoration: none;
+        }
+
+        /* 响应式容器 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            overflow: hidden;
+            margin-top: 2rem;
+        }
+
+        .card-header {
+            background: #f1f3f5;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #dee2e6;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header h5 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* 提示框样式 */
+        .alert {
+            border-radius: 6px;
+            padding: 0.8rem 1rem;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-info {
+            background-color: #e7f3ff;
+            border-color: #b8daff;
+            color: #004085;
+        }
+
+        /* 表单样式 */
+        .form-control {
+            border-radius: 4px;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #ced4da;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+        }
+
+        /* 按钮样式 */
+        .btn {
+            border-radius: 4px;
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0069d9;
+            border-color: #0062cc;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+
+        .btn-outline-primary {
+            color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        /* 分割线 */
+        hr {
+            margin: 1.5rem 0;
+            border-top: 1px solid #e9ecef;
+        }
+
+        /* 标题样式 */
+        h5 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        /* 表格样式 */
+        .table-responsive {
+            margin-bottom: 1.5rem;
+        }
+
+        .table {
+            width: 100%;
+            margin-bottom: 0;
+            background-color: transparent;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+            padding: 0.75rem;
+            border-top: none;
+        }
+
+        .table td {
+            padding: 0.75rem;
+            vertical-align: middle;
+        }
+
+        .table-bordered {
+            border: 1px solid #dee2e6;
+        }
+
+        .table-bordered th,
+        .table-bordered td {
+            border: 1px solid #dee2e6;
+        }
+
+        /* 复选框样式 */
+        .table input[type="checkbox"] {
+            margin: 0;
+            transform: scale(1.2);
+        }
+
+        table.readonly input[type="checkbox"] {
+            pointer-events: none;
+        }
+
+        /* 返回链接 */
+        .back {
+            padding: 0 1.5rem 1.5rem;
+            border-top: 1px solid #dee2e6;
+            margin-top: 0;
+        }
+
+        .back a {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .back a:hover {
+            text-decoration: underline;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 10px;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+
+            .table th,
+            .table td {
+                padding: 0.5rem;
+                font-size: 0.9rem;
+            }
+
+            .btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9rem;
+            }
+
+            .alert {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .card-header h5 {
+                font-size: 1.1rem;
+            }
+
+            .card-body {
+                padding: 0.8rem;
+            }
+
+            .table th,
+            .table td {
+                padding: 0.3rem;
+                font-size: 0.85rem;
+            }
+
+            .btn {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* 间距优化 */
+        .mb-0 { margin-bottom: 0 !important; }
+        .mb-2 { margin-bottom: 0.5rem !important; }
+        .mb-3 { margin-bottom: 1rem !important; }
+        .mt-3 { margin-top: 1rem !important; }
+        .my-4 { margin: 1.5rem 0 !important; }
+
+        /* 文本对齐 */
+        .text-center { text-align: center !important; }
+
+        /* 完成情况折叠展示 */
+        .work-desc {
+            max-height: 4.5em;          /* 大约 3 行 */
+            overflow: hidden;
+            white-space: normal;
+            position: relative;
+        }
+
+        .work-desc.expanded {
+            max-height: none;
+        }
+
+        .toggle-link {
+            display: inline-block;
+            margin-top: 4px;
+            font-size: 12px;
+            color: #007bff;
+            cursor: pointer;
+        }
+
+        .toggle-link:hover {
+            text-decoration: underline;
+        }
+
+        /* 指标含义折叠展示 */
+        .indicator-desc {
+            max-height: 4.5em;          /* 约 3 行 */
+            overflow: hidden;
+            white-space: normal;
+            position: relative;
+        }
+
+        .indicator-desc.expanded {
+            max-height: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">重点工作指标信息管理</h5>
+            <div>
+                <a href="/admin/index" class="back-link">← 返回后台首页</a>
+            </div>
+        </div>
+
+        <div class="card-body">
+
+            <!-- ================= Excel 导入 ================= -->
+            <div class="alert alert-info">
+                重点工作指标Excel导入必须包含以下四列（第一行为表头）：<br>
+                <strong>部门</strong>、<strong>绩效指标</strong>、<strong>指标含义</strong>、<strong>完成情况</strong><br>
+                <small>说明：完成情况字数需在 1000 字以内</small>
+            </div>
+
+            <form id="uploadForm">
+                <div class="mb-3">
+                    <input class="form-control" type="file" name="file" accept=".xlsx,.xls" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    上传并导入
+                </button>
+            </form>
+
+            <div id="result" class="mt-3"></div>
+
+            <hr class="my-4">
+            <h5 class="mb-3">重点工作指标佐证材料上传</h5>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm">
+                    <thead>
+                    <tr>
+                        <th>部门</th>
+                        <th>指标名称</th>
+                        <th>指标含义</th>
+                        <th>完成情况</th>
+                        <th style="width:260px;">佐证材料</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for item in zdgz_items %}
+                    <tr>
+                        <td>{{ item.department }}</td>
+                        <td>{{ item.indicator_name }}</td>
+                        <td style="max-width:300px;">
+                            {% if item.description %}
+                            <div class="indicator-desc" id="desc-{{ item.id }}">
+                                {{ item.description | trim }}
+                            </div>
+                            <span class="toggle-link"
+                                  onclick="toggleIndicatorDesc({{ item.id }}, this)">
+                                    展开
+                            </span>
+                            {% else %}
+                            —
+                            {% endif %}
+                        </td>
+                        <td style="max-width:420px;">
+                            {% if item.work_desc %}
+                            <div class="work-desc" id="wd-{{ item.id }}">
+                                {{ item.work_desc | trim }}
+                            </div>
+                            <span class="toggle-link"
+                                  onclick="toggleWorkDesc({{ item.id }}, this)">
+                                展开
+                            </span>
+                            {% else %}
+                            —
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.evidence_path %}
+                            <a href="{{ url_for('download_zdgz_evidence', zdgz_id=item.id) }}"
+                               class="btn btn-sm btn-outline-primary">
+                                查看佐证材料
+                            </a>
+                            <br>
+                            {% endif %}
+                            <input type="file"
+                                   onchange="uploadEvidence({{ item.id }}, this)">
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- ================= 重点工作指标权限配置 ================= -->
+            <h5 class="mb-3">重点工作指标权限配置（按部门）</h5>
+
+            <div class="mb-2">
+                <button class="btn btn-sm btn-secondary" onclick="enableEdit()">修改</button>
+                <button class="btn btn-sm btn-primary" id="saveBtn" disabled onclick="save()">保存</button>
+            </div>
+
+            <div class="table-responsive">
+                <table id="permTable" class="table table-bordered table-sm readonly">
+                    <thead>
+                    <tr>
+                        <th style="width:160px;">角色</th>
+                        <th style="width:120px;">权重</th>
+                        {% for d in zdgz_departments %}
+                        <th>{{ d.department }}</th>
+                        {% endfor %}
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for r in roles %}
+                    <tr data-role-id="{{ r.id }}">
+                        <td>{{ r.role_name }}</td>
+
+                        <td class="text-center">
+                            <input type="number"
+                                   class="form-control form-control-sm text-center"
+                                   style="width:80px; margin:auto;"
+                                   step="0.01"
+                                   min="0"
+                                   value="{{ r.zdgz_weight if r.zdgz_weight is defined else 0 }}"
+                                   data-weight
+                                   disabled>
+                        </td>
+
+                        {% for d in zdgz_departments %}
+                        <td class="text-center">
+                            <input type="checkbox"
+                                   data-department="{{ d.department }}"
+                                   disabled
+                                   {% if zdgz_permissions.get(r.id) and d.department in zdgz_permissions.get(r.id) %}
+                                   checked
+                                   {% endif %}
+                            >
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ================= Excel 上传 ================= */
+    document.getElementById('uploadForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const resultDiv = document.getElementById('result');
+
+        resultDiv.innerHTML = '正在上传，请稍候…';
+
+        fetch('/admin/zdgz/import', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+            } else {
+                resultDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
+            }
+        })
+        .catch(() => {
+            resultDiv.innerHTML = `<div class="alert alert-danger">上传失败</div>`;
+        });
+    });
+
+    /* ================= 权限配置 ================= */
+    function enableEdit() {
+        document.querySelectorAll('#permTable input[type="checkbox"]').forEach(cb => {
+            cb.disabled = false;
+        });
+        document.querySelectorAll('#permTable input[data-weight]').forEach(inp => {
+            inp.disabled = false;
+        });
+        document.getElementById('permTable').classList.remove('readonly');
+        document.getElementById('saveBtn').disabled = false;
+    }
+
+    function save() {
+        const data = [];
+
+        document.querySelectorAll('#permTable tbody tr').forEach(tr => {
+            const roleId = tr.dataset.roleId;
+            const depts = [];
+
+            tr.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                if (cb.checked) {
+                    depts.push(cb.dataset.department);
+                }
+            });
+
+            const weightInput = tr.querySelector('input[data-weight]');
+            const weight = weightInput ? parseFloat(weightInput.value || 0) : 0;
+
+            data.push({
+                role_id: roleId,
+                zdgz_weight: weight,
+                departments: depts
+            });
+        });
+
+        document.getElementById('saveBtn').disabled = true;
+
+        fetch('/admin/zdgz/permission/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(resp => {
+            if (resp.error) {
+                alert('保存失败：' + resp.error);
+                document.getElementById('saveBtn').disabled = false;
+                return;
+            }
+
+            alert(resp.msg || '保存成功');
+
+            document.querySelectorAll('#permTable input').forEach(inp => {
+                inp.disabled = true;
+            });
+            document.getElementById('permTable').classList.add('readonly');
+        });
+    }
+
+    function uploadEvidence(id, input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const fd = new FormData();
+        fd.append('zdgz_id', id);
+        fd.append('file', file);
+
+        fetch('/admin/zdgz/evidence/upload', {
+            method: 'POST',
+            body: fd
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                alert('上传成功');
+                location.reload();
+            }
+        })
+        .catch(() => alert('上传失败'));
+    }
+    function toggleWorkDesc(id, el) {
+        const div = document.getElementById('wd-' + id);
+        if (div.classList.contains('expanded')) {
+            div.classList.remove('expanded');
+            el.innerText = '展开';
+        } else {
+            div.classList.add('expanded');
+            el.innerText = '收起';
+        }
+    }
+    function toggleIndicatorDesc(id, el) {
+        const div = document.getElementById('desc-' + id);
+        if (div.classList.contains('expanded')) {
+            div.classList.remove('expanded');
+            el.innerText = '展开';
+        } else {
+            div.classList.add('expanded');
+            el.innerText = '收起';
+        }
+    }
+</script>
+
+</body>
+</html>
